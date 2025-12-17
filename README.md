@@ -97,9 +97,16 @@ tod_list/
 │   ├── services/           # Servicios del backend
 │   ├── types/              # Tipos TypeScript compartidos
 │   └── index.ts            # Servidor Express
+├── tests/                  # Pruebas automatizadas
+│   ├── api/                # Pruebas de API
+│   ├── e2e/                # Pruebas end-to-end
+│   ├── helpers/            # Utilidades para pruebas
+│   └── setup/              # Configuración de pruebas
 ├── dist/                   # Archivos compilados
+├── coverage/               # Reportes de cobertura
 ├── package.json
 ├── tsconfig.json
+├── jest.config.js          # Configuración de Jest
 └── vite.config.ts
 ```
 
@@ -124,6 +131,54 @@ La tabla `todos` tiene la siguiente estructura:
 - `createdAt` (DATETIME)
 - `updatedAt` (DATETIME)
 
+## 🧪 Pruebas Automatizadas
+
+El proyecto incluye pruebas automatizadas usando Jest, Supertest y Selenium WebDriver.
+
+### Pruebas de API
+
+Las pruebas de API verifican todos los endpoints del backend:
+
+```bash
+npm run test:api
+```
+
+### Pruebas End-to-End (E2E)
+
+Las pruebas E2E con Selenium verifican la funcionalidad completa de la interfaz:
+
+**Importante:** Antes de ejecutar las pruebas E2E, asegúrate de tener:
+
+1. Chrome/Chromium instalado
+2. El backend y frontend ejecutándose:
+   ```bash
+   npm run dev:all
+   ```
+
+Luego ejecuta las pruebas E2E:
+
+```bash
+npm run test:e2e
+```
+
+### Ejecutar todas las pruebas
+
+```bash
+npm test
+```
+
+### Modo watch (desarrollo)
+
+```bash
+npm run test:watch
+```
+
+### Cobertura de código
+
+```bash
+npm run test:coverage
+```
+
 ## 📝 Scripts Disponibles
 
 - `npm run dev` - Ejecutar backend en modo desarrollo
@@ -133,6 +188,11 @@ La tabla `todos` tiene la siguiente estructura:
 - `npm run build:server` - Compilar solo el backend
 - `npm run build:client` - Compilar solo el frontend
 - `npm start` - Ejecutar en producción
+- `npm test` - Ejecutar todas las pruebas
+- `npm run test:api` - Ejecutar solo pruebas de API
+- `npm run test:e2e` - Ejecutar solo pruebas E2E
+- `npm run test:watch` - Ejecutar pruebas en modo watch
+- `npm run test:coverage` - Generar reporte de cobertura
 
 ## 🐛 Solución de Problemas
 

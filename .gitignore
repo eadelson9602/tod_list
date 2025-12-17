@@ -3,3 +3,6 @@ dist/
 *.log
 .env
 .DS_Store
+coverage/
+test-database.sqlite
+*.sqlite-journal
