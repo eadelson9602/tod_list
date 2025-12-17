@@ -4,6 +4,7 @@ import {
   until,
   WebDriver,
   WebElement,
+  Key,
   Browser,
 } from "selenium-webdriver";
 
@@ -87,46 +88,71 @@ async function setup(): Promise<boolean> {
     const backendRunning = await checkServer(3000);
 
     if (!frontendRunning || !backendRunning) {
-      console.warn(`
-╔══════════════════════════════════════════════════════════════╗
-║  ⚠️  Servidores no están ejecutándose                       ║
-╠══════════════════════════════════════════════════════════════╣
-║  Frontend (5173): ${frontendRunning ? "✓ OK" : "✗ NO"}                    ║
-║  Backend (3000):  ${backendRunning ? "✓ OK" : "✗ NO"}                    ║
-║                                                               ║
-║  Solución:                                                    ║
-║  Ejecuta en otra terminal:                                    ║
-║    npm run dev:all                                            ║
-╚══════════════════════════════════════════════════════════════╝
-      `);
+      console.warn("Servidores no están ejecutándose");
       return false;
     }
 
     console.log("✓ Servidores verificados correctamente");
 
     // Crear driver - Patrón simple según documentación oficial
-    console.log("Iniciando ChromeDriver...");
+    console.log("Iniciando FirefoxDriver...");
+    console.log(
+      "  Nota: Selenium Manager puede tardar en descargar FirefoxDriver la primera vez"
+    );
+    console.log("  Esto puede tomar hasta 2 minutos...");
     const startTime = Date.now();
 
-    driver = await new Builder().forBrowser(Browser.CHROME).build();
+    // Mostrar progreso cada 10 segundos
+    const progressInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      console.log(`  Esperando... (${elapsed}s)`);
+    }, 10000);
 
-    const initTime = Date.now() - startTime;
-    console.log(`✓ ChromeDriver iniciado exitosamente en ${initTime}ms`);
+    try {
+      // Agregar timeout para evitar que se cuelgue indefinidamente
+      const driverPromise = new Builder().forBrowser(Browser.FIREFOX).build();
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          clearInterval(progressInterval);
+          reject(
+            new Error(
+              "Timeout: FirefoxDriver no pudo iniciarse después de 120 segundos"
+            )
+          );
+        }, 120000); // 2 minutos
+      });
 
-    // Configurar timeouts
-    await driver.manage().setTimeouts({
-      implicit: 10000,
-      pageLoad: 30000,
-      script: 30000,
-    });
+      driver = await Promise.race([driverPromise, timeoutPromise]);
+      clearInterval(progressInterval);
+      const initTime = Date.now() - startTime;
+      console.log(`✓ FirefoxDriver iniciado exitosamente en ${initTime}ms`);
 
-    // Navegar a la aplicación
-    console.log(`Navegando a ${BASE_URL}...`);
-    await driver.get(BASE_URL);
-    await waitForElement(driver, By.css("#app"), 15000);
+      // Configurar timeouts
+      await driver.manage().setTimeouts({
+        implicit: 10000,
+        pageLoad: 30000,
+        script: 30000,
+      });
 
-    console.log("✓ Selenium WebDriver inicializado correctamente\n");
-    return true;
+      // Navegar a la aplicación
+      console.log(`Navegando a ${BASE_URL}...`);
+      await driver.get(BASE_URL);
+      await waitForElement(driver, By.css("#app"), 15000);
+
+      console.log(
+        "✓ Selenium WebDriver (Firefox) inicializado correctamente\n"
+      );
+      return true;
+    } catch (error: any) {
+      clearInterval(progressInterval);
+      const elapsed = Date.now() - startTime;
+      if (error.message && error.message.includes("Timeout")) {
+        console.error(`Se tardo demasiado en crear el driver.`);
+      } else {
+        console.error(`✗ Error al crear FirefoxDriver: ${error.message}`);
+      }
+      return false;
+    }
   } catch (error: any) {
     console.error(`✗ Error en setup: ${error.message}`);
     if (error.stack) {
@@ -143,9 +169,9 @@ async function teardown(): Promise<void> {
   if (driver) {
     try {
       await driver.quit();
-      console.log("✓ ChromeDriver cerrado correctamente");
+      console.log("✓ FirefoxDriver cerrado correctamente");
     } catch (error) {
-      console.warn("⚠️  Error al cerrar ChromeDriver:", error);
+      console.warn("⚠️  Error al cerrar FirefoxDriver:", error);
     }
   }
 }
@@ -278,12 +304,27 @@ async function testEditarTarea(driver: WebDriver): Promise<void> {
   );
   await editButton.click();
 
-  await waitForElement(driver, By.css("#title"), 5000);
+  // Esperar a que el formulario se llene con los datos de la tarea
+  await driver.wait(
+    async () => {
+      try {
+        const titleInput = await driver.findElement(By.css("#title"));
+        const value = await titleInput.getAttribute("value");
+        return value && value.includes("Tarea para editar");
+      } catch {
+        return false;
+      }
+    },
+    5000,
+    "El formulario debería haberse llenado con los datos de la tarea"
+  );
 
-  const editTitleInput = await waitForElement(driver, By.css("#title"));
+  const editTitleInput = await waitForClickable(driver, By.css("#title"));
   const editTitleValue = await editTitleInput.getAttribute("value");
-  if (!editTitleValue.includes("Tarea para editar")) {
-    throw new Error("El formulario no se llenó correctamente");
+  if (!editTitleValue || !editTitleValue.includes("Tarea para editar")) {
+    throw new Error(
+      `El formulario no se llenó correctamente. Valor obtenido: "${editTitleValue}"`
+    );
   }
 
   await editTitleInput.clear();
@@ -358,6 +399,11 @@ async function testEliminarTarea(driver: WebDriver): Promise<void> {
 
   const todoItemsBefore = await driver.findElements(By.css(".todo-item"));
   const countBefore = todoItemsBefore.length;
+
+  // Sobrescribir window.confirm para aceptar automáticamente antes de hacer clic
+  await driver.executeScript(`
+    window.confirm = function() { return true; };
+  `);
 
   const deleteButton = await waitForClickable(
     driver,
