@@ -9,17 +9,20 @@ Esta aplicación permite gestionar tareas de manera eficiente con una interfaz w
 ## 🛠️ Stack Tecnológico
 
 ### Backend
+
 - **Node.js** - Entorno de ejecución
 - **Express.js** - Framework web
 - **TypeScript** - Lenguaje de programación
 - **SQLite3** - Base de datos local
 
 ### Frontend
+
 - **Vue 3** - Framework JavaScript progresivo
 - **Vite** - Herramienta de construcción
 - **TypeScript** - Lenguaje de programación
 
 ### Pruebas
+
 - **Jest** - Framework de pruebas (API y Frontend)
 - **Supertest** - Pruebas HTTP para API
 - **Vue Test Utils** - Utilidades para pruebas de Vue
@@ -57,6 +60,7 @@ npm install
 ```
 
 Este comando instalará todas las dependencias necesarias, incluyendo:
+
 - Dependencias de producción (Express, Vue, SQLite3)
 - Dependencias de desarrollo (Jest, Selenium, TypeScript, etc.)
 
@@ -79,6 +83,7 @@ npm run dev:all
 ```
 
 Esto iniciará:
+
 - **Backend**: `http://localhost:3000`
 - **Frontend**: `http://localhost:5173`
 
@@ -111,6 +116,7 @@ npm run build
 ```
 
 Esto compilará:
+
 - Backend TypeScript a JavaScript en `dist/`
 - Frontend Vue con Vite en `dist/public/`
 
@@ -126,17 +132,18 @@ El servidor estará disponible en `http://localhost:3000` y servirá tanto la AP
 
 ### Endpoints Disponibles
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| `GET` | `/api/todos` | Obtener todas las tareas |
-| `GET` | `/api/todos/:id` | Obtener una tarea por ID |
-| `POST` | `/api/todos` | Crear una nueva tarea |
-| `PUT` | `/api/todos/:id` | Actualizar una tarea existente |
-| `DELETE` | `/api/todos/:id` | Eliminar una tarea |
+| Método   | Endpoint         | Descripción                    |
+| -------- | ---------------- | ------------------------------ |
+| `GET`    | `/api/todos`     | Obtener todas las tareas       |
+| `GET`    | `/api/todos/:id` | Obtener una tarea por ID       |
+| `POST`   | `/api/todos`     | Crear una nueva tarea          |
+| `PUT`    | `/api/todos/:id` | Actualizar una tarea existente |
+| `DELETE` | `/api/todos/:id` | Eliminar una tarea             |
 
 ### Ejemplo de Uso con cURL
 
 **Crear una tarea:**
+
 ```bash
 curl -X POST http://localhost:3000/api/todos \
   -H "Content-Type: application/json" \
@@ -144,11 +151,13 @@ curl -X POST http://localhost:3000/api/todos \
 ```
 
 **Obtener todas las tareas:**
+
 ```bash
 curl http://localhost:3000/api/todos
 ```
 
 **Actualizar una tarea:**
+
 ```bash
 curl -X PUT http://localhost:3000/api/todos/1 \
   -H "Content-Type: application/json" \
@@ -156,6 +165,7 @@ curl -X PUT http://localhost:3000/api/todos/1 \
 ```
 
 **Eliminar una tarea:**
+
 ```bash
 curl -X DELETE http://localhost:3000/api/todos/1
 ```
@@ -163,23 +173,28 @@ curl -X DELETE http://localhost:3000/api/todos/1
 ## 🎯 Uso de la Aplicación
 
 1. **Iniciar la aplicación:**
+
    ```bash
    npm run dev:all
    ```
 
 2. **Abrir en el navegador:**
+
    - Navega a `http://localhost:5173`
 
 3. **Crear una tarea:**
+
    - Completa el formulario con título (requerido) y descripción (opcional)
    - Haz clic en "Crear"
 
 4. **Editar una tarea:**
+
    - Haz clic en el botón "✏️ Editar" de la tarea
    - Modifica los campos en el formulario
    - Haz clic en "Actualizar"
 
 5. **Completar una tarea:**
+
    - Haz clic en el botón "✅ Completar"
    - La tarea se marcará como completada visualmente
 
@@ -195,23 +210,25 @@ La base de datos SQLite se crea automáticamente en `src/database.sqlite` cuando
 
 ### Estructura de la Tabla `todos`
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INTEGER PRIMARY KEY | Identificador único (auto-incremental) |
-| `title` | TEXT NOT NULL | Título de la tarea (requerido) |
-| `description` | TEXT | Descripción de la tarea (opcional) |
-| `completed` | INTEGER DEFAULT 0 | Estado de completado (0 = no completado, 1 = completado) |
-| `createdAt` | DATETIME | Fecha de creación |
-| `updatedAt` | DATETIME | Fecha de última actualización |
+| Campo         | Tipo                | Descripción                                              |
+| ------------- | ------------------- | -------------------------------------------------------- |
+| `id`          | INTEGER PRIMARY KEY | Identificador único (auto-incremental)                   |
+| `title`       | TEXT NOT NULL       | Título de la tarea (requerido)                           |
+| `description` | TEXT                | Descripción de la tarea (opcional)                       |
+| `completed`   | INTEGER DEFAULT 0   | Estado de completado (0 = no completado, 1 = completado) |
+| `createdAt`   | DATETIME            | Fecha de creación                                        |
+| `updatedAt`   | DATETIME            | Fecha de última actualización                            |
 
 ### Backup y Restauración
 
 **Backup:**
+
 ```bash
 cp src/database.sqlite src/database.sqlite.backup
 ```
 
 **Restaurar:**
+
 ```bash
 cp src/database.sqlite.backup src/database.sqlite
 ```
@@ -234,6 +251,7 @@ Verifican todos los endpoints del backend y su funcionalidad:
 **Ubicación:** `tests/api/todo.api.test.ts`
 
 **Ejecutar:**
+
 ```bash
 npm run test:api
 ```
@@ -250,6 +268,7 @@ Verifican los componentes Vue y su funcionalidad:
 **Ubicación:** `tests/frontend/`
 
 **Ejecutar:**
+
 ```bash
 npm run test:frontend
 ```
@@ -269,6 +288,7 @@ Verifican la funcionalidad completa de la interfaz web desde el navegador:
 **Ubicación:** `tests/e2e/todo.e2e.ts`
 
 **Requisitos:**
+
 - Firefox instalado
 - Backend y frontend ejecutándose:
   ```bash
@@ -276,6 +296,7 @@ Verifican la funcionalidad completa de la interfaz web desde el navegador:
   ```
 
 **Ejecutar:**
+
 ```bash
 npm run test:e2e
 # o directamente:
@@ -287,11 +308,13 @@ npm run test:selenium
 ### Ejecutar Todas las Pruebas
 
 **Todas las pruebas de Jest (API + Frontend):**
+
 ```bash
 npm test
 ```
 
 **Todas las pruebas incluyendo E2E:**
+
 ```bash
 npm test && npm run test:e2e
 ```
@@ -313,6 +336,7 @@ npm run test:coverage
 ```
 
 El reporte se generará en la carpeta `coverage/` con:
+
 - Reporte en texto en la consola
 - Reporte HTML en `coverage/index.html`
 - Reporte LCOV en `coverage/lcov.info`
@@ -374,43 +398,44 @@ tod_list/
 
 ### Desarrollo
 
-| Script | Descripción |
-|--------|-------------|
-| `npm run dev` | Ejecutar solo el backend en modo desarrollo |
-| `npm run dev:client` | Ejecutar solo el frontend en modo desarrollo |
-| `npm run dev:all` | Ejecutar ambos (backend + frontend) en paralelo |
+| Script               | Descripción                                     |
+| -------------------- | ----------------------------------------------- |
+| `npm run dev`        | Ejecutar solo el backend en modo desarrollo     |
+| `npm run dev:client` | Ejecutar solo el frontend en modo desarrollo    |
+| `npm run dev:all`    | Ejecutar ambos (backend + frontend) en paralelo |
 
 ### Compilación
 
-| Script | Descripción |
-|--------|-------------|
-| `npm run build` | Compilar todo el proyecto (backend + frontend) |
-| `npm run build:server` | Compilar solo el backend |
-| `npm run build:client` | Compilar solo el frontend |
+| Script                 | Descripción                                    |
+| ---------------------- | ---------------------------------------------- |
+| `npm run build`        | Compilar todo el proyecto (backend + frontend) |
+| `npm run build:server` | Compilar solo el backend                       |
+| `npm run build:client` | Compilar solo el frontend                      |
 
 ### Producción
 
-| Script | Descripción |
-|--------|-------------|
+| Script      | Descripción                          |
+| ----------- | ------------------------------------ |
 | `npm start` | Ejecutar servidor en modo producción |
 
 ### Pruebas
 
-| Script | Descripción |
-|--------|-------------|
-| `npm test` | Ejecutar todas las pruebas de Jest (API + Frontend) |
-| `npm run test:api` | Ejecutar solo pruebas de API |
-| `npm run test:frontend` | Ejecutar solo pruebas de frontend |
-| `npm run test:e2e` | Ejecutar pruebas E2E con Selenium (Firefox) |
-| `npm run test:selenium` | Alias de `test:e2e` |
-| `npm run test:watch` | Ejecutar pruebas en modo watch |
-| `npm run test:coverage` | Generar reporte de cobertura |
+| Script                  | Descripción                                         |
+| ----------------------- | --------------------------------------------------- |
+| `npm test`              | Ejecutar todas las pruebas de Jest (API + Frontend) |
+| `npm run test:api`      | Ejecutar solo pruebas de API                        |
+| `npm run test:frontend` | Ejecutar solo pruebas de frontend                   |
+| `npm run test:e2e`      | Ejecutar pruebas E2E con Selenium (Firefox)         |
+| `npm run test:selenium` | Alias de `test:e2e`                                 |
+| `npm run test:watch`    | Ejecutar pruebas en modo watch                      |
+| `npm run test:coverage` | Generar reporte de cobertura                        |
 
 ## 🔧 Configuración
 
 ### TypeScript
 
 La configuración de TypeScript se encuentra en `tsconfig.json`:
+
 - Target: ES2020
 - Module: CommonJS
 - Strict mode habilitado
@@ -419,6 +444,7 @@ La configuración de TypeScript se encuentra en `tsconfig.json`:
 ### Jest
 
 La configuración de Jest se encuentra en `jest.config.js`:
+
 - Usa `ts-jest` para compilar TypeScript
 - Proyectos separados para backend y frontend
 - Configuración específica para Vue con `@vue/vue3-jest`
@@ -427,6 +453,7 @@ La configuración de Jest se encuentra en `jest.config.js`:
 ### Vite
 
 La configuración de Vite se encuentra en `vite.config.ts`:
+
 - Plugin Vue habilitado
 - Hot Module Replacement (HMR) en desarrollo
 - Optimizaciones de producción
@@ -434,6 +461,7 @@ La configuración de Vite se encuentra en `vite.config.ts`:
 ### Selenium
 
 Las pruebas E2E usan Selenium WebDriver con Firefox:
+
 - **Navegador:** Firefox (configurado en `tests/e2e/todo.e2e.ts`)
 - **Driver:** FirefoxDriver (descargado automáticamente por Selenium Manager)
 - **Timeouts:**
@@ -452,9 +480,7 @@ import { app } from "../../src/index";
 
 describe("Mi Nueva Prueba de API", () => {
   it("debería hacer algo", async () => {
-    const response = await request(app)
-      .get("/api/endpoint")
-      .expect(200);
+    const response = await request(app).get("/api/endpoint").expect(200);
 
     expect(response.body).toHaveProperty("data");
   });
@@ -471,7 +497,7 @@ import MiComponente from "@/components/MiComponente.vue";
 describe("MiComponente.vue", () => {
   it("debería renderizar correctamente", () => {
     const wrapper = mount(MiComponente, {
-      props: { prop1: "valor" }
+      props: { prop1: "valor" },
     });
     expect(wrapper.find(".clase").exists()).toBe(true);
   });
@@ -484,10 +510,8 @@ describe("MiComponente.vue", () => {
 import { Builder, By, Browser } from "selenium-webdriver";
 
 async function miPruebaE2E() {
-  const driver = await new Builder()
-    .forBrowser(Browser.FIREFOX)
-    .build();
-  
+  const driver = await new Builder().forBrowser(Browser.FIREFOX).build();
+
   try {
     await driver.get("http://localhost:5173");
     const element = await driver.findElement(By.css("#mi-elemento"));
@@ -506,11 +530,13 @@ async function miPruebaE2E() {
 ### Problemas de Instalación
 
 **Error: `npm install` falla**
+
 - Verifica que tengas Node.js v16 o superior
 - Limpia la caché: `npm cache clean --force`
 - Elimina `node_modules` y `package-lock.json`, luego ejecuta `npm install` nuevamente
 
 **Error: Dependencias no encontradas**
+
 - Ejecuta `npm install` nuevamente
 - Verifica tu conexión a internet
 - Si persiste, elimina `node_modules` y reinstala
@@ -518,6 +544,7 @@ async function miPruebaE2E() {
 ### Problemas de Ejecución
 
 **Puertos en uso (3000 o 5173)**
+
 ```bash
 # Windows
 netstat -ano | findstr :3000
@@ -528,11 +555,13 @@ taskkill /PID <PID> /F
 ```
 
 **Backend no inicia**
+
 - Verifica que no haya errores de sintaxis en `src/index.ts`
 - Asegúrate de que SQLite esté instalado correctamente
 - Revisa los logs en la consola
 
 **Frontend no carga**
+
 - Verifica que Vite esté instalado: `npm list vite`
 - Limpia la caché de Vite: elimina `node_modules/.vite`
 - Reinstala dependencias si es necesario
@@ -540,32 +569,37 @@ taskkill /PID <PID> /F
 ### Problemas con Pruebas
 
 **Las pruebas de API fallan**
+
 - Verifica que la base de datos de prueba se elimine correctamente
 - Asegúrate de que no haya conflictos con datos existentes
 - Revisa que los endpoints estén correctamente configurados
 
 **Las pruebas de frontend fallan**
+
 - Verifica que `@vue/test-utils` esté instalado
 - Asegúrate de que `jest.config.js` tenga la configuración correcta para Vue
 - Revisa que los componentes Vue estén correctamente importados
 
 **Las pruebas E2E fallan**
+
 - **Firefox no está instalado:**
   - Instala Firefox desde [mozilla.org/firefox](https://www.mozilla.org/firefox)
-  
 - **Backend/Frontend no están ejecutándose:**
+
   ```bash
   # En una terminal separada:
   npm run dev:all
   ```
 
 - **FirefoxDriver timeout:**
+
   - La primera vez, Selenium Manager descarga FirefoxDriver (puede tardar hasta 2 minutos)
   - Verifica tu conexión a internet
   - Ejecuta nuevamente después de que termine la descarga
   - Selenium Manager cachea el driver, las siguientes ejecuciones serán más rápidas
 
 - **Diálogos de confirmación:**
+
   - Las pruebas E2E sobrescriben `window.confirm` automáticamente
   - Si tienes problemas, verifica que el código de sobrescritura esté presente
 
@@ -575,6 +609,7 @@ taskkill /PID <PID> /F
   - Asegúrate de que la aplicación esté completamente cargada
 
 **Error: "Cannot find module" en pruebas**
+
 - Ejecuta `npm install` para asegurar que todas las dependencias estén instaladas
 - Verifica que `tsconfig.json` y `jest.config.js` estén correctamente configurados
 
@@ -583,15 +618,19 @@ taskkill /PID <PID> /F
 ### Desarrollo
 
 1. **Usa modo watch para desarrollo:**
+
    ```bash
    npm run dev:all
    ```
+
    Los cambios se reflejarán automáticamente.
 
 2. **Ejecuta pruebas frecuentemente:**
+
    ```bash
    npm run test:watch
    ```
+
    Esto te ayudará a detectar errores temprano.
 
 3. **Mantén la base de datos limpia:**
@@ -601,14 +640,17 @@ taskkill /PID <PID> /F
 ### Pruebas
 
 1. **Ejecuta pruebas antes de hacer commit:**
+
    ```bash
    npm test && npm run test:e2e
    ```
 
 2. **Revisa la cobertura de código regularmente:**
+
    ```bash
    npm run test:coverage
    ```
+
    Apunta a mantener al menos 80% de cobertura.
 
 3. **Para pruebas E2E:**
@@ -619,11 +661,13 @@ taskkill /PID <PID> /F
 ### Producción
 
 1. **Compila antes de desplegar:**
+
    ```bash
    npm run build
    ```
 
 2. **Verifica que la compilación sea exitosa:**
+
    - Revisa que no haya errores en `dist/`
    - Prueba la aplicación compilada localmente antes de desplegar
 
