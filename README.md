@@ -98,6 +98,9 @@ tod_list/
 │   ├── types/              # Tipos TypeScript compartidos
 │   └── index.ts            # Servidor Express
 ├── tests/                  # Pruebas automatizadas
+│   ├── api/               # Pruebas de API (Jest)
+│   ├── frontend/          # Pruebas de frontend (Jest)
+│   └── e2e/               # Pruebas E2E (Selenium - independiente de Jest)
 │   ├── api/                # Pruebas de API
 │   ├── e2e/                # Pruebas end-to-end
 │   ├── helpers/            # Utilidades para pruebas
@@ -133,19 +136,31 @@ La tabla `todos` tiene la siguiente estructura:
 
 ## 🧪 Pruebas Automatizadas
 
-El proyecto incluye pruebas automatizadas usando Jest, Supertest y Selenium WebDriver.
+El proyecto incluye pruebas automatizadas separadas en dos categorías:
 
-### Pruebas de API
+### Pruebas con Jest
 
-Las pruebas de API verifican todos los endpoints del backend:
+**Pruebas de API** (Jest + Supertest):
 
 ```bash
 npm run test:api
 ```
 
-### Pruebas End-to-End (E2E)
+**Pruebas de Frontend** (Jest + Vue Test Utils):
 
-Las pruebas E2E con Selenium verifican la funcionalidad completa de la interfaz:
+```bash
+npm run test:frontend
+```
+
+**Ejecutar todas las pruebas de Jest:**
+
+```bash
+npm test
+```
+
+### Pruebas E2E con Selenium (Independientes de Jest)
+
+Las pruebas E2E con Selenium están **separadas de Jest** y se ejecutan directamente con Node.js/TypeScript.
 
 **Importante:** Antes de ejecutar las pruebas E2E, asegúrate de tener:
 
@@ -155,17 +170,15 @@ Las pruebas E2E con Selenium verifican la funcionalidad completa de la interfaz:
    npm run dev:all
    ```
 
-Luego ejecuta las pruebas E2E:
+**Ejecutar pruebas E2E con Selenium:**
 
 ```bash
 npm run test:e2e
+# o directamente:
+npm run test:selenium
 ```
 
-### Ejecutar todas las pruebas
-
-```bash
-npm test
-```
+**Nota:** Las pruebas E2E (`tests/e2e/todo.e2e.ts`) son independientes de Jest y se ejecutan con `ts-node`.
 
 ### Modo watch (desarrollo)
 
@@ -188,9 +201,11 @@ npm run test:coverage
 - `npm run build:server` - Compilar solo el backend
 - `npm run build:client` - Compilar solo el frontend
 - `npm start` - Ejecutar en producción
-- `npm test` - Ejecutar todas las pruebas
-- `npm run test:api` - Ejecutar solo pruebas de API
-- `npm run test:e2e` - Ejecutar solo pruebas E2E
+- `npm test` - Ejecutar todas las pruebas de Jest (API + Frontend)
+- `npm run test:api` - Ejecutar solo pruebas de API (Jest)
+- `npm run test:frontend` - Ejecutar solo pruebas de frontend (Jest)
+- `npm run test:e2e` - Ejecutar pruebas E2E con Selenium (independiente de Jest)
+- `npm run test:selenium` - Ejecutar pruebas E2E con Selenium (alias de test:e2e)
 - `npm run test:watch` - Ejecutar pruebas en modo watch
 - `npm run test:coverage` - Generar reporte de cobertura
 

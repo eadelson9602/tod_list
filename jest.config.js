@@ -20,7 +20,7 @@ module.exports = {
     {
       displayName: "backend",
       testEnvironment: "node",
-      roots: ["<rootDir>/tests/api", "<rootDir>/tests/e2e"],
+      roots: ["<rootDir>/tests/api"],
       testMatch: ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
       transform: {
         "^.+\\.ts$": "ts-jest",
@@ -35,17 +35,18 @@ module.exports = {
         "^.+\\.ts$": [
           "ts-jest",
           {
-            tsconfig: {
-              compilerOptions: {
-                module: "esnext",
-                target: "esnext",
-                esModuleInterop: true,
-                skipLibCheck: true,
-              },
+            tsconfig: "<rootDir>/tests/frontend/tsconfig.json",
+          },
+        ],
+        "^.+\\.vue$": [
+          "@vue/vue3-jest",
+          {
+            tsConfig: {
+              esModuleInterop: true,
+              allowSyntheticDefaultImports: true,
             },
           },
         ],
-        "^.+\\.vue$": "@vue/vue3-jest",
       },
       testEnvironmentOptions: {
         customExportConditions: ["node", "node-addons"],

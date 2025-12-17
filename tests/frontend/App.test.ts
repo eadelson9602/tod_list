@@ -1,22 +1,24 @@
 import { describe, it, expect, beforeEach, jest } from "@jest/globals";
 import { mount } from "@vue/test-utils";
-import App from "../../../src/public/App.vue";
+import App from "@/App.vue";
 import type { Todo } from "../../../src/types/todo";
 
 // Mock del servicio API
-const mockGetAllTodos = jest.fn();
-const mockCreateTodo = jest.fn();
-const mockUpdateTodo = jest.fn();
-const mockDeleteTodo = jest.fn();
+const mockGetAllTodos = jest.fn<() => Promise<Todo[]>>();
+const mockCreateTodo = jest.fn<() => Promise<Todo>>();
+const mockUpdateTodo = jest.fn<() => Promise<Todo>>();
+const mockDeleteTodo = jest.fn<() => Promise<void>>();
 
-jest.mock("../../../src/public/services/api", () => ({
-  apiService: {
-    getAllTodos: mockGetAllTodos,
-    createTodo: mockCreateTodo,
-    updateTodo: mockUpdateTodo,
-    deleteTodo: mockDeleteTodo,
-  },
-}));
+jest.mock("@/services/api", () => {
+  return {
+    apiService: {
+      getAllTodos: jest.fn<() => Promise<Todo[]>>(),
+      createTodo: jest.fn<() => Promise<Todo>>(),
+      updateTodo: jest.fn<() => Promise<Todo>>(),
+      deleteTodo: jest.fn<() => Promise<void>>(),
+    },
+  };
+});
 
 describe("App.vue", () => {
   let wrapper: ReturnType<typeof mount>;
@@ -41,7 +43,8 @@ describe("App.vue", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetAllTodos.mockResolvedValue(mockTodos);
+    const { apiService } = require("@/services/api");
+    apiService.getAllTodos.mockResolvedValue(mockTodos);
   });
 
   it("debería renderizar el componente principal", () => {
@@ -60,7 +63,8 @@ describe("App.vue", () => {
     await wrapper.vm.$nextTick();
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(mockGetAllTodos).toHaveBeenCalled();
+    const { apiService } = require("@/services/api");
+    expect(apiService.getAllTodos).toHaveBeenCalled();
   });
 
   it("debería mostrar el estado de carga inicialmente", () => {
@@ -91,7 +95,8 @@ describe("App.vue", () => {
   });
 
   it("debería mostrar mensajes de error cuando falla la carga", async () => {
-    mockGetAllTodos.mockRejectedValueOnce(new Error("Error de red"));
+    const { apiService } = require("@/services/api");
+    apiService.getAllTodos.mockRejectedValueOnce(new Error("Error de red"));
     wrapper = mount(App);
     await wrapper.vm.$nextTick();
     await new Promise((resolve) => setTimeout(resolve, 200));
@@ -110,8 +115,9 @@ describe("App.vue", () => {
       updatedAt: "2024-01-01T00:00:00.000Z",
     };
 
-    mockCreateTodo.mockResolvedValueOnce(newTodo);
-    mockGetAllTodos.mockResolvedValueOnce([...mockTodos, newTodo]);
+    const { apiService } = require("@/services/api");
+    apiService.createTodo.mockResolvedValueOnce(newTodo);
+    apiService.getAllTodos.mockResolvedValueOnce([...mockTodos, newTodo]);
 
     wrapper = mount(App);
     await wrapper.vm.$nextTick();
@@ -127,7 +133,7 @@ describe("App.vue", () => {
       await wrapper.vm.$nextTick();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      expect(mockCreateTodo).toHaveBeenCalled();
+      expect(apiService.createTodo).toHaveBeenCalled();
     }
   });
 });

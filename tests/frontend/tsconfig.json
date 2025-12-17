@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "types": ["node", "jest", "@types/jest", "jsdom"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "strict": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": "../../",
+    "paths": {
+      "@/*": ["src/public/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "../types.d.ts",
+    "../../src/**/*"
+  ]
+}

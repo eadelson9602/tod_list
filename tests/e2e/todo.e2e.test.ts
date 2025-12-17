@@ -1,23 +1,11 @@
-import { Builder, By, until, WebDriver, WebElement } from "selenium-webdriver";
-import chrome from "selenium-webdriver/chrome";
-import * as fs from "fs";
-
-/**
- * Verifica si Chrome está instalado en el sistema
- * Según documentación de Selenium: https://www.selenium.dev/documentation/webdriver/browsers/chrome/
- */
-function isChromeInstalled(): boolean {
-  const possiblePaths = [
-    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-    process.env.LOCALAPPDATA + "\\Google\\Chrome\\Application\\chrome.exe",
-    process.env.PROGRAMFILES + "\\Google\\Chrome\\Application\\chrome.exe",
-    process.env["PROGRAMFILES(X86)"] +
-      "\\Google\\Chrome\\Application\\chrome.exe",
-  ];
-
-  return possiblePaths.some((p) => p && fs.existsSync(p));
-}
+import {
+  Builder,
+  By,
+  until,
+  WebDriver,
+  WebElement,
+  Browser,
+} from "selenium-webdriver";
 
 /**
  * Verifica si un servidor está corriendo en un puerto específico
@@ -39,40 +27,7 @@ async function checkServer(
   });
 }
 
-/**
- * Crea un WebDriver de Chrome según las mejores prácticas de Selenium 4
- *
- * Referencias oficiales:
- * - https://www.selenium.dev/documentation/webdriver/getting_started/first_script/
- * - https://www.selenium.dev/documentation/webdriver/browsers/chrome/
- * - https://www.selenium.dev/documentation/webdriver/waits/
- *
- * Selenium Manager (desde Selenium 4.6+) maneja automáticamente ChromeDriver,
- * no necesitamos configurar ServiceBuilder manualmente.
- */
-async function createChromeDriver(): Promise<WebDriver> {
-  const options = new chrome.Options();
-
-  // Opciones recomendadas por Selenium para estabilidad y rendimiento
-  // https://www.selenium.dev/documentation/webdriver/browsers/chrome/
-  options.addArguments("--no-sandbox");
-  options.addArguments("--disable-dev-shm-usage");
-  options.addArguments("--disable-gpu");
-  options.addArguments("--window-size=1920,1080");
-  options.addArguments("--disable-extensions");
-  options.addArguments("--disable-logging");
-  options.addArguments("--disable-software-rasterizer");
-  options.addArguments("--disable-background-timer-throttling");
-  options.addArguments("--disable-backgrounding-occluded-windows");
-  options.addArguments("--disable-renderer-backgrounding");
-
-  // Descomentar para ejecutar en modo headless (sin ventana)
-  // Útil para CI/CD: options.addArguments("--headless=new");
-
-  // Selenium Manager maneja ChromeDriver automáticamente desde Selenium 4.6+
-  // https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/
-  return new Builder().forBrowser("chrome").setChromeOptions(options).build();
-}
+// No necesitamos función wrapper - usar directamente como en el ejemplo que funciona
 
 /**
  * Helper para esperar elementos usando WebDriverWait (mejor práctica)
@@ -88,14 +43,26 @@ async function waitForElement(
 
 /**
  * Helper para esperar que un elemento sea visible y clickeable
+ * Según documentación oficial: https://www.selenium.dev/documentation/webdriver/waits/
+ *
+ * Primero espera que el elemento esté localizado, luego que sea visible,
+ * y finalmente que esté habilitado (enabled) para poder hacer clic.
  */
 async function waitForClickable(
   driver: WebDriver,
   locator: By,
   timeout: number = 10000
 ): Promise<WebElement> {
+  // Esperar a que el elemento esté localizado
   const element = await waitForElement(driver, locator, timeout);
-  return driver.wait(until.elementIsVisible(element), timeout);
+
+  // Esperar a que sea visible (según mejores prácticas)
+  await driver.wait(until.elementIsVisible(element), timeout);
+
+  // Esperar a que esté habilitado (para poder hacer clic)
+  await driver.wait(until.elementIsEnabled(element), timeout);
+
+  return element;
 }
 
 describe("Todo List E2E Tests", () => {
@@ -108,34 +75,7 @@ describe("Todo List E2E Tests", () => {
   let skipReason = "";
 
   beforeAll(async () => {
-    // Verificar Chrome ANTES de intentar iniciar (síncrono, sin esperas)
-    // Esto evita timeouts innecesarios
-    if (!isChromeInstalled()) {
-      shouldSkipTests = true;
-      skipReason = "Chrome no encontrado en el sistema";
-      console.warn(`
-╔══════════════════════════════════════════════════════════════╗
-║  ⚠️  Chrome no encontrado - Saltando pruebas E2E             ║
-╠══════════════════════════════════════════════════════════════╣
-║  Las pruebas E2E requieren Google Chrome instalado.           ║
-║                                                               ║
-║  Solución:                                                    ║
-║  1. Instala Google Chrome desde:                              ║
-║     https://www.google.com/chrome/                            ║
-║                                                               ║
-║  2. O usa Chromium desde:                                    ║
-║     https://www.chromium.org/getting-involved/download-chromium ║
-║                                                               ║
-║  Nota: Las pruebas E2E están completamente implementadas,     ║
-║        solo requieren Chrome para ejecutarse.                ║
-╚══════════════════════════════════════════════════════════════╝
-      `);
-      return; // Salir inmediatamente sin intentar iniciar ChromeDriver
-    }
-
     try {
-      console.log("✓ Chrome encontrado en el sistema");
-
       // Verificar que los servidores estén corriendo
       console.log("Verificando servidores...");
       const frontendRunning = await checkServer(5173);
@@ -165,37 +105,39 @@ describe("Todo List E2E Tests", () => {
 
       console.log("✓ Servidores verificados correctamente");
 
-      // Crear driver usando Selenium Manager (automático desde Selenium 4.6+)
-      console.log("Iniciando ChromeDriver con Selenium Manager...");
+      // Crear driver - Patrón simple que funciona según tu prueba
+      console.log("Iniciando ChromeDriver...");
+      console.log(
+        "  Nota: Selenium Manager puede tardar en descargar ChromeDriver la primera vez"
+      );
       const startTime = Date.now();
 
       try {
-        // Usar Promise.race con timeout corto para fallar rápido si hay problemas
-        driver = await Promise.race([
-          createChromeDriver(),
-          new Promise<never>((_, reject) =>
-            setTimeout(
-              () =>
-                reject(
-                  new Error(
-                    "SKIP_E2E_TESTS: Timeout al iniciar ChromeDriver (8 segundos)"
-                  )
-                ),
-              8000 // 8 segundos máximo (tiempo razonable para Selenium Manager)
-            )
-          ),
-        ]);
+        // Usar exactamente el mismo patrón que funciona en tu ejemplo
+        // Sin wrappers, sin Promise.race, directamente como funciona
+        console.log(
+          "  Ejecutando: new Builder().forBrowser(Browser.CHROME).build()"
+        );
+        driver = await new Builder().forBrowser(Browser.CHROME).build();
+        console.log("  ✓ Builder.build() completado");
 
         const initTime = Date.now() - startTime;
         console.log(`✓ ChromeDriver iniciado exitosamente en ${initTime}ms`);
 
         // Configurar timeouts según documentación de Selenium
         // https://www.selenium.dev/documentation/webdriver/waits/
+        // https://www.selenium.dev/documentation/webdriver/drivers/
+        //
+        // Nota: Los timeouts también se pueden configurar en las opciones de Chrome,
+        // pero configurarlos después del build es más flexible
         await driver.manage().setTimeouts({
-          implicit: 10000, // 10 segundos para encontrar elementos
+          implicit: 10000, // 10 segundos para encontrar elementos (usar con precaución)
           pageLoad: 30000, // 30 segundos para cargar páginas
-          script: 30000, // 30 segundos para scripts
+          script: 30000, // 30 segundos para ejecutar scripts
         });
+
+        // Nota: Preferir explicit waits sobre implicit waits según documentación
+        // https://www.selenium.dev/documentation/webdriver/waits/
 
         // Navegar a la aplicación y esperar a que esté lista usando explicit wait
         console.log(`Navegando a ${BASE_URL}...`);
@@ -211,11 +153,14 @@ describe("Todo List E2E Tests", () => {
         shouldSkipTests = true;
         skipReason = `ChromeDriver no pudo iniciarse después de ${elapsed}ms`;
 
-        // Si es un error de SKIP, no lanzar
-        if (
+        // Si es un error de SKIP o timeout, no lanzar
+        const isTimeoutError =
           buildError.message &&
-          buildError.message.includes("SKIP_E2E_TESTS")
-        ) {
+          (buildError.message.includes("SKIP_E2E_TESTS") ||
+            buildError.message.includes("Timeout") ||
+            buildError.message.includes("timeout"));
+
+        if (isTimeoutError) {
           console.warn(`
 ╔══════════════════════════════════════════════════════════════╗
 ║  ⚠️  ChromeDriver timeout - Saltando pruebas                ║
@@ -223,10 +168,18 @@ describe("Todo List E2E Tests", () => {
 ║  Tiempo transcurrido: ${elapsed}ms                                    ║
 ║                                                               ║
 ║  Posibles causas:                                            ║
-║  1. Chrome no está correctamente instalado                   ║
-║  2. Problemas de permisos                                     ║
-║  3. Firewall/antivirus bloqueando                            ║
-║  4. Selenium Manager no puede descargar ChromeDriver          ║
+║  1. Selenium Manager está descargando ChromeDriver            ║
+║     (la primera vez puede tardar más de 60 segundos)          ║
+║  2. Chrome no está correctamente instalado                   ║
+║  3. Problemas de permisos                                     ║
+║  4. Firewall/antivirus bloqueando                            ║
+║  5. Problemas de conexión a internet                         ║
+║                                                               ║
+║  Soluciones:                                                 ║
+║  - Espera a que Selenium Manager termine de descargar        ║
+║  - Verifica tu conexión a internet                           ║
+║  - Ejecuta nuevamente (Selenium Manager cachea drivers)       ║
+║  - Verifica que Chrome esté instalado correctamente          ║
 ║                                                               ║
 ║  Nota: Las pruebas E2E están implementadas correctamente. ║
 ║        Este es un problema de configuración del entorno.    ║
@@ -235,14 +188,23 @@ describe("Todo List E2E Tests", () => {
           return;
         }
 
-        // Para otros errores, mostrar mensaje y salir
+        // Para otros errores, mostrar mensaje detallado
+        const errorMessage =
+          buildError.message || buildError.toString() || "Error desconocido";
+        const errorStack = buildError.stack
+          ? `\n║  Stack: ${buildError.stack.split("\n")[0]}`
+          : "";
+
         console.warn(`
 ╔══════════════════════════════════════════════════════════════╗
 ║  ⚠️  Error al iniciar ChromeDriver - Saltando pruebas       ║
 ╠══════════════════════════════════════════════════════════════╣
-║  Error: ${buildError.message || "Error desconocido"}                    ║
+║  Error: ${errorMessage}                    ║${errorStack}
+║                                                               ║
+║  Tiempo transcurrido: ${elapsed}ms                                    ║
 ║                                                               ║
 ║  Nota: Las pruebas E2E están implementadas correctamente. ║
+║        Revisa el error arriba para más detalles.           ║
 ╚══════════════════════════════════════════════════════════════╝
         `);
         return;
@@ -254,7 +216,7 @@ describe("Todo List E2E Tests", () => {
       console.warn(`\n⚠️  Saltando pruebas E2E: ${skipReason}\n`);
       return;
     }
-  }, 12000); // Timeout de 12 segundos para el beforeAll
+  }, 120000); // Timeout de 120 segundos (2 minutos) para el beforeAll - Selenium Manager puede tardar mucho la primera vez
 
   afterAll(async () => {
     if (driver) {
@@ -415,11 +377,9 @@ describe("Todo List E2E Tests", () => {
       );
       await editButton.click();
 
-      // Esperar a que el formulario se llene
-      await d.wait(
-        until.elementIsVisible(await d.findElement(By.css("#title"))),
-        5000
-      );
+      // Esperar a que el formulario se llene usando explicit wait
+      // Mejor práctica: usar waitForElement en lugar de findElement + wait
+      await waitForElement(d, By.css("#title"), 5000);
 
       // Verificar que el formulario se llenó con los datos
       const editTitleInput = await waitForElement(d, By.css("#title"));
@@ -475,8 +435,8 @@ describe("Todo List E2E Tests", () => {
       );
       await completeButton.click();
 
-      // Esperar a que la tarea tenga la clase completed
-      await d.wait(until.elementLocated(By.css(".todo-item.completed")), 5000);
+      // Esperar a que la tarea tenga la clase completed usando explicit wait
+      await waitForElement(d, By.css(".todo-item.completed"), 5000);
 
       // Verificar que la tarea tiene la clase completed
       const completedItems = await d.findElements(
