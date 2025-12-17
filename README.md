@@ -49,7 +49,7 @@ Esta aplicación permite gestionar tareas de manera eficiente con una interfaz w
 ### 1. Clonar o descargar el proyecto
 
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/eadelson9602/tod_list
 cd tod_list
 ```
 
